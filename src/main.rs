@@ -6,15 +6,15 @@ use winapi::shared::windef::{HWND, POINT, HBRUSH};
 use winapi::shared::minwindef::{UINT,WPARAM,LPARAM,LRESULT};
 
 
-extern "system" fn process_event (window_handle: HWND, msg_id: UINT,
+extern "system" fn process_event (object_handle: HWND, msg_id: UINT,
                                 w_param: WPARAM, l_param: LPARAM) -> LRESULT {
     unsafe {
-        println!("{}", window_handle as usize);
+        println!("{}", object_handle as usize);
         match msg_id {
             WM_CREATE => {},
-            WM_CLOSE   => { DestroyWindow(window_handle); },
+            WM_CLOSE   => { DestroyWindow(object_handle); },
             WM_DESTROY =>  { PostQuitMessage(0); },
-            _ => return DefWindowProcW(window_handle, msg_id, w_param, l_param)
+            _ => return DefWindowProcW(object_handle, msg_id, w_param, l_param)
         }
     }
     0
