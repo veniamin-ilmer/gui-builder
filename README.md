@@ -1,7 +1,6 @@
 # visual-rust
 This is going to be a *long* project...
 
-## Introduction
 I want to build the "Visual Basic" of Rust:
 
 * An easy to use platform where you can click and drag, resize, and reconfigure widgets on a window.
@@ -9,8 +8,8 @@ I want to build the "Visual Basic" of Rust:
 * The widgets (buttons, text boxes, etc), when compiled, should be created with the Operating System's native libraries.
 * All of the widgets should have programmable event handlers, all written in Rust.
 
-### Why..
-#### Do this at all?
+## Why..
+### Do this at all?
 GUI programming is generally considered a *hard* task, especially for a beginner programmer.
 
 Even a seasoned programmer would need to think hard about platform compatibility..
@@ -19,7 +18,7 @@ Without some kind of GUI tool, it is difficult to manage the exact positions of 
 
 The target audience is a UI designer who wants to quickly build a fast cross-compatible widget-based application.
 
-#### Rust?
+### Rust?
 Rust is a powerful language:
 
 1. Low Level (Fast / Optimized).
@@ -29,7 +28,7 @@ Rust is a powerful language:
 
 And personally, this is to expand my knowledge / abilities with Rust.
 
-#### Native widgets?
+### Native widgets?
 There is a cross-compatible crate [conrod](https://crates.io/crates/conrod) that draws custom widgets.
 
 By drawing custom widgets, exactly the applications appears exactly the same in all operating systems.
@@ -39,7 +38,7 @@ I don't like this for two reasons:
 1. The look and feel of the application does not play well with the rest of operating system. It feels foreign.
 2. Non-native widget drawing libraries require more memory. I want to be able to rival Notepad.exe in memory usage.
 
-#### Visual Basic?
+### Visual Basic?
 Visual Basic was my first language.
 
 Although the language itself is poor, building a GUI was a piece of cake.
