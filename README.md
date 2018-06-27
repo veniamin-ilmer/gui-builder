@@ -46,10 +46,10 @@ Although the language itself is poor, building a GUI was a piece of cake.
 
 I want to integrate a good language - Rust - With easy GUI building from Visual Basic.
 
-### How?
-#### Phase 1
+## How?
+### Phase 1
 
-##### Part A
+#### Part A
 Write Rust code that creates an example window, with a few widgets in:
 
 * Windows - **Done**
@@ -62,7 +62,7 @@ Figure out how to hook into widget specific events handlers for each operating s
 
 For Linux, default to the simplest widget library for now. For example, FLTK.
 
-##### Part B
+#### Part B
 Combine all of this code into one simple Rust windowing code.
 
 The Rust code should have tags in it that detect which operating system you're on, and provide the correct code for that operating system.
@@ -71,7 +71,7 @@ Although we are not yet implementing event handling, it would be good to at leas
 
 Try to abstract away event handling code, to be generic enough, so that the user can use the same event handling function with every operating system.
 
-##### Part C
+#### Part C
 Write up a HTML / Javascript "portal" that allows you to create a "window", and create "widgets" on this window.
 
 The "windows" and "widgets" here would just be drawings of the real thing.
@@ -82,12 +82,12 @@ When you click on any widget, a dialog appears, that allows you to change any pr
 
 You should be able to click and drag,  resize, create, delete any widget.
 
-##### Part D
+#### Part D
 Make the HTML portal have a "Build" button, that generates all of the Rust code required to compile into all 3 operating systems.
 
 So, we need to keep all of the data, about each widget, stored in a way that can be translated into Rust code later.
 
-##### Part E
+#### Part E
 Add in support for the rest of the Linux widget libraries (Qt and GTK).
 
 In the HTML portal, for Linux, the user will need to select which widget library they want to build into.
@@ -96,15 +96,15 @@ The HTML portal should adjust the graphics accordingly.
 
 The portal will need to build the Rust code for these libraries.
 
-##### Part F
+#### Part F
 Figure out some way to Save and Open projects in the HTML portal.
 
 Potentially this could be some kind of commented out templating in the built Rust code.
 
-#### Phase 2
+### Phase 2
 Add event handling into the HTML portal. Allow users to update the rust code of any widget's event trigger.
 
-#### Phase ???
+### Phase ???
 Make Visual-Rust "Self Hosting". Rewrite it, to compile directly from Rust.
 
 The HTML tool should be advanced enough, were this is entirely possible to do from the portal.
