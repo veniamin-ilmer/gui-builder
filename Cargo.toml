@@ -3,8 +3,6 @@ name = "windows1"
 version = "0.1.0"
 authors = ["ilmer"]
 
-#[dependencies]
-#winapi = "*"
-
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["winuser"] }
+winapi = { version = "0.3", features = ["winuser", "commctrl"] }
+
