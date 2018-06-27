@@ -63,6 +63,15 @@ Figure out how to hook into widget specific events handlers for each operating s
 For Linux, default to the simplest widget library for now. For example, FLTK.
 
 ##### Part B
+Combine all of this code into one simple Rust windowing code.
+
+The Rust code should have tags in it that detect which operating system you're on, and provide the correct code for that operating system.
+
+Although we are not yet implementing event handling, it would be good to at least expose the hooks to be available for someone using this GUI tool.
+
+Try to abstract away event handling code, to be generic enough, so that the user can use the same event handling function with every operating system.
+
+##### Part C
 Write up a HTML / Javascript "portal" that allows you to create a "window", and create "widgets" on this window.
 
 The "windows" and "widgets" here would just be drawings of the real thing.
@@ -73,16 +82,12 @@ When you click on any widget, a dialog appears, that allows you to change any pr
 
 You should be able to click and drag,  resize, create, delete any widget.
 
-##### Part C
+##### Part D
 Make the HTML portal have a "Build" button, that generates all of the Rust code required to compile into all 3 operating systems.
 
-The Rust code should have tags in it that detect which operating system you're on, and provide the correct code for that operating system.
+So, we need to keep all of the data, about each widget, stored in a way that can be translated into Rust code later.
 
-Although we are not yet implementing event handling, it would be good to at least expose the hooks to be available for someone using this GUI tool.
-
-Try to abstract away event handling code, to be generic enough, so that the user can use the same event handling function with every operating system.
-
-##### Part D
+##### Part E
 Add in support for the rest of the Linux widget libraries (Qt and GTK).
 
 In the HTML portal, for Linux, the user will need to select which widget library they want to build into.
@@ -91,7 +96,7 @@ The HTML portal should adjust the graphics accordingly.
 
 The portal will need to build the Rust code for these libraries.
 
-##### Part E
+##### Part F
 Figure out some way to Save and Open projects in the HTML portal.
 
 Potentially this could be some kind of commented out templating in the built Rust code.
