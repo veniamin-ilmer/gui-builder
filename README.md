@@ -87,6 +87,11 @@ Make the HTML portal have a "Build" button, that generates all of the Rust code 
 So, we need to keep all of the data, about each widget, stored in a way that can be translated into Rust code later.
 
 #### Part E
+Figure out some way to Save and Open projects in the HTML portal.
+
+Potentially this could be some kind of commented out templating in the built Rust code.
+
+#### Part F
 Add in support for the rest of the Linux widget libraries (Qt and GTK).
 
 In the HTML portal, for Linux, the user will need to select which widget library they want to build into.
@@ -94,11 +99,6 @@ In the HTML portal, for Linux, the user will need to select which widget library
 The HTML portal should adjust the graphics accordingly.
 
 The portal will need to build the Rust code for these libraries.
-
-#### Part F
-Figure out some way to Save and Open projects in the HTML portal.
-
-Potentially this could be some kind of commented out templating in the built Rust code.
 
 ### Phase 2
 Add event handling into the HTML portal. Allow users to update the rust code of any widget's event trigger.
