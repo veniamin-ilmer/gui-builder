@@ -51,9 +51,9 @@ I want to integrate a good language - Rust - With easy GUI building from Visual 
 #### Part A
 Write Rust code that creates an example window, with a few widgets in:
 
-* Windows - **Done**
-* Mac
-* Linux
+* [x] Windows
+* [ ] Mac
+* [ ] Linux
 
 Use low level crates to build these windows and widgets.
 
