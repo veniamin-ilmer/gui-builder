@@ -8,11 +8,11 @@ I want to build the "Visual Basic" of Rust:
 * The widgets (buttons, text boxes, etc), when compiled, should be created with the Operating System's native libraries.
 * All of the widgets should have programmable event handlers, all written in Rust.
 
-### [Why?](why.md)
+### [Why?](read/why.md)
 
-### [How?](how.md)
+### [How?](read/how.md)
 
 ### Progress Pics
 
-![Windows](windows.png)
-![Linux gtk](gtk.png)
+![Windows](read/windows.png)
+![Linux gtk](read/gtk.png)
