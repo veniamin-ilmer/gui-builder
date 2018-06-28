@@ -59,7 +59,7 @@ Use low level crates to build these windows and widgets.
 
 Figure out how to hook into widget specific events handlers for each operating system.
 
-For Linux, default to the simplest widget library for now. For example, FLTK.
+For Linux, default to GTK.
 
 #### Part B
 Combine all of this code into one simple Rust windowing code.
@@ -92,7 +92,7 @@ Figure out some way to Save and Open projects in the HTML portal.
 Potentially this could be some kind of commented out templating in the built Rust code.
 
 #### Part F
-Add in support for the rest of the Linux widget libraries (Qt and GTK).
+Add in support for the rest of the Linux widget libraries (Eg: Qt).
 
 In the HTML portal, for Linux, the user will need to select which widget library they want to build into.
 
