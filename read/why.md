@@ -19,9 +19,9 @@ Rust is a powerful language:
 And personally, this is to expand my knowledge / abilities with Rust.
 
 ### Native widgets?
-There is a cross-compatible crate [conrod](https://crates.io/crates/conrod) that draws custom widgets.
+There is a cross-compatible crate [conrod](https://crates.io/crates/conrod) that draws custom widgets, instead of using native libaries.
 
-By drawing custom widgets, exactly the applications appears exactly the same in all operating systems.
+By drawing custom widgets, the applications appears exactly the same in all operating systems.
 
 I don't like this for two reasons:
 
