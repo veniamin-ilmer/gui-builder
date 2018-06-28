@@ -5,16 +5,13 @@ NSApplicationActivateIgnoringOtherApps, NSApplicationActivationPolicyRegular, NS
 
 pub fn create_window(title: &str, width: f64, height: f64) {
 
-        let window = unsafe { NSWindow::alloc(nil)
-            .initWithContentRect_styleMask_backing_defer_(NSRect::new(NSPoint::new(0., 0.),
-                                                                      NSSize::new(width, height)),
-                                                          NSWindowStyleMask::NSTitledWindowMask | NSWindowStyleMask::NSClosableWindowMask,
-                                                          NSBackingStoreBuffered,
-                                                          NO) };
+        unsafe { 
+	    let window = NSWindow::alloc(nil).initWithContentRect_styleMask_backing_defer_(
+		    NSRect::new(NSPoint::new(0., 0.), NSSize::new(width, height)),
+                    NSWindowStyleMask::NSTitledWindowMask | NSWindowStyleMask::NSClosableWindowMask,
+                    NSBackingStoreBuffered, NO);
 
-        let view = unsafe { NSWindow::contentView(window) };
-
-        unsafe {
+	    let view = NSWindow::contentView(window);
 
             window.setAcceptsMouseMovedEvents_(YES);
             window.makeKeyAndOrderFront_(nil);
