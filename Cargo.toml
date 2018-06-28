@@ -3,5 +3,8 @@ name = "windows1"
 version = "0.1.0"
 authors = ["ilmer"]
 
-[target.'cfg(windows)'.dependencies]
+[target.'cfg(target_os = "windows")'.dependencies]
 winapi = { version = "0.3", features = ["winuser", "commctrl"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = { version = "0.4.1", features = ["v3_10"] }
