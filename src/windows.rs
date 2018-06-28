@@ -50,9 +50,9 @@ fn unicode_str(str: &str) -> Vec<u16> {
 }
 
 
-fn create_button(window_handle: HWND) -> HWND {
+fn create_button(window_handle: HWND, title: &str) -> HWND {
   let class_name = unicode_str("BUTTON");
-  let title = unicode_str("Button");
+  let title = unicode_str(title);
 
   let x = 10;
   let y = 10;
@@ -112,7 +112,7 @@ pub fn create_window() -> HWND {
   let x = 0;
   let y = 0;
   let width = 240;
-  let height = 200;
+  let height = 200 + 20;  //Add 20px to account for the window title. (In windows, the title bar size is part of the height, so need to add in that extra bit.)
 
   unsafe {
 //    let hmod = GetModuleHandleW(null_mut());
@@ -171,7 +171,7 @@ fn handle_events() {
  
 pub fn main() {
   let window_handle = create_window();
-  create_button(window_handle);
+  create_button(window_handle, "Click me");
   create_textbox(window_handle);
   handle_events();
 }

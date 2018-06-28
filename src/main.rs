@@ -9,6 +9,5 @@ extern crate gtk;
 mod linux_gtk;
 
 fn main() {
-  linux_gtk::main();
-//  std::thread::sleep(std::time::Duration::from_millis(5000));
+  windows::main();
 }
