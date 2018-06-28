@@ -6,7 +6,7 @@ I want to build the "Visual Basic" of Rust:
 * An easy to use platform where you can click and drag, resize, and reconfigure widgets on a window.
 * This window should be able to compile into Rust code, cross-compatible in Windows, Mac, and Linux.
 * The widgets (buttons, text boxes, etc) should use the Operating System's native libraries.
-* All of the widgets should have programmable event handlers, all written in Rust.
+* All of the widgets should have programmable event handlers, with the OS abstracted away.
 
 ### [Why?](read/why.md)
 
