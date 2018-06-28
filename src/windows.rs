@@ -171,7 +171,7 @@ fn handle_events() {
  
 pub fn main() {
   let window_handle = create_window();
-  create_button(window_handle, "Click me");
+  create_button(window_handle, "Click me!");
   create_textbox(window_handle);
   handle_events();
 }
