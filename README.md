@@ -1,4 +1,4 @@
-# visual-rust
+# Visual Rust
 This is going to be a *long* project...
 
 I want to build the "Visual Basic" of Rust:
@@ -53,7 +53,7 @@ Write Rust code that creates an example window, with a few widgets in:
 
 * [x] Windows
 * [ ] Mac
-* [ ] Linux
+* [x] Linux
 
 Use low level crates to build these windows and widgets.
 
