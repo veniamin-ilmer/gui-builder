@@ -31,13 +31,8 @@ pub fn create_window(title: &str, width: f64, height: f64) {
             current_app.activateWithOptions_(NSApplicationActivateIgnoringOtherApps);
 
             window.setOpaque_(YES);
-            window.center();
-
         }
-
 }
-
-
 
 
 pub fn main() {
