@@ -1,12 +1,12 @@
 # How?
 ## Phase 1
 
-### Part A
+### Part A - In Progress
 Write Rust code that creates an example window, with a few widgets in:
 
 * [x] Windows
-* [ ] Mac
 * [x] Linux
+* [ ] Mac
 
 Use low level crates to build these windows and widgets.
 
@@ -15,7 +15,7 @@ Figure out how to hook into widget specific events handlers for each operating s
 For Linux, default to GTK.
 
 ### Part B
-Combine all of this code into one simple Rust windowing code.
+Combine all of this code into one widget library.
 
 The Rust code should have tags in it that detect which operating system you're on, and provide the correct code for that operating system.
 
@@ -35,7 +35,7 @@ When you click on any widget, a dialog appears, that allows you to change any pr
 You should be able to click and drag,  resize, create, delete any widget.
 
 ### Part D
-Make the HTML portal have a "Build" button, that generates all of the Rust code required to compile into all 3 operating systems.
+Make the HTML portal have a "Build" button, that generates all of the Rust code required to compile to use this widget library, with all the widget's properties written out.
 
 So, we need to keep all of the data, about each widget, stored in a way that can be translated into Rust code later.
 
