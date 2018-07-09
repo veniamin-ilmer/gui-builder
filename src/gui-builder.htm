@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Rust GUI Editor</title>
+<title>Rust GUI Builder</title>
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <style>
 body {margin:0}
@@ -122,12 +122,7 @@ window.onload = function() {
   window.addEventListener('mousedown', pageMouseDown, false);
   window.addEventListener('mousemove', mouseMove, false);
   window.addEventListener('mouseup', mouseUp, false);
- 
-  var button = createButton(10, 10, 100, 100);
-  var button = createButton(210, 10, 100, 100);
-  var entry = createEntry(10, 210, 100, 100);
-  var image = createImage(210, 210, 100, 100);
-  
+
   document.getElementById('window_body').addEventListener('mousedown', windowMouseDown, false);  //Focus on me.
 }
 
@@ -448,7 +443,7 @@ function mouseUp(e) {
 
 
 function createButton(left, top, width, height) {
-  var memory_id = OBJECT_MEMORY.push({'left': left, 'top': top, 'width': width, 'height': height}) - 1;
+  var memory_id = OBJECT_MEMORY.push({'type': 'button', 'left': left, 'top': top, 'width': width, 'height': height}) - 1;
 
   var button = document.createElement("div");
   button.className = "object button";
@@ -467,7 +462,7 @@ function createButton(left, top, width, height) {
 }
 
 function createEntry(left, top, width, height) {
-  var memory_id = OBJECT_MEMORY.push({'left': left, 'top': top, 'width': width, 'height': height}) - 1;
+  var memory_id = OBJECT_MEMORY.push({'type': 'entry', 'left': left, 'top': top, 'width': width, 'height': height}) - 1;
 
   var entry = document.createElement("div");
   entry.className = "object entry";
@@ -486,7 +481,7 @@ function createEntry(left, top, width, height) {
 }
 
 function createImage(left, top, width, height) {
-  var memory_id = OBJECT_MEMORY.push({'left': left, 'top': top, 'width': width, 'height': height}) - 1;
+  var memory_id = OBJECT_MEMORY.push({'type': 'image', 'left': left, 'top': top, 'width': width, 'height': height}) - 1;
 
   var image = document.createElement("div");
   image.className = "object image";
@@ -527,6 +522,8 @@ function delete_element() {
   if(selected.length > 1) {
     while(selected.length > 0) {
       var focused = selected[0];
+      var memory_id = focused.memory_id
+      OBJECT_MEMORY.splice(memory_id, 1); //Remove element. Splice reindexes everything else.
       window_body.removeChild(focused);
       focused.classList.remove('selected');
     }
@@ -566,6 +563,35 @@ function set_value(input, actual_id, actual_attr, append_str) {
 function save_window() {
   saveTextAs(JSON.stringify(OBJECT_MEMORY), "rust_window.json");
 }
+
+function load_window() {
+var file = document.getElementById("load_file").files[0];
+if (file) {
+  var reader = new FileReader();
+  reader.readAsText(file, "UTF-8");
+  reader.onload = function (event) {
+    //Remove all old objects.
+    for(var memory_id = 0; memory_id < OBJECT_MEMORY.length; memory_id++) {
+      var obj = document.querySelectorAll('[memory_id="' + memory_id + '"]')[0];
+      window_body.removeChild(obj);
+    }
+    OBJECT_MEMORY = [];
+    var objs = JSON.parse(event.target.result);  //This will overright OBJECT_MEMORY.
+    for(var i = 0; i < objs.length; i++) {
+      var obj = objs[i];
+      if(obj['type'] == 'button') {
+        createButton(obj['left'], obj['top'], obj['width'], obj['height']);
+      } else if(obj['type'] == 'entry') {
+        createEntry(obj['left'], obj['top'], obj['width'], obj['height']);
+      } else if(obj['type'] == 'image') {
+        createImage(obj['left'], obj['top'], obj['width'], obj['height']);
+      }
+    }
+  }
+}
+}
+</script>
+<script>
 function build_rust() {
   saveTextAs(JSON.stringify(OBJECT_MEMORY), "main.rs");
 }
@@ -581,6 +607,7 @@ function build_rust() {
 <button style="width:100%" onclick="delete_element()">Delete</button>
 <br><br>
 <table style="width:100%">
+<caption>Window</caption>
 <tr>
 <td>Title</td>
 <td width="100%"><input style="width:100%" type="text" value="Title" id="title_input" oninput="set_value(this, 'window_title', 'innerText');" /></td>
@@ -598,7 +625,7 @@ function build_rust() {
 </tr>
 </table>
 </aside>
-<article id="window" style="width:800px; height:625px; float:left" onresize="alert('meow'); document.getElementById('width_input').value=document.getElementById('window').offsetWidth; document.getElementById('height_input').value=document.getElementById('window').offsetHeight;">
+<article id="window" style="width:800px; height:625px; float:left">
 <section id="window_title">Title</section>
 <section id="window_body">
 <div class="resizer" id="nw" style='cursor:nw-resize;' onmousedown="DRAG_TYPE = 'nw'; rememberXY(event); event.stopPropagation();" ondragstart="return false;"></div>
@@ -609,15 +636,10 @@ function build_rust() {
 </section>
 </article>
 <aside style="clear:both; border-style: outset; border-width: 1px; background-color: #D4D0C8; position: fixed; bottom: 0; width: 100%; display:flex">
-<div style="flex: 1"><button>Load</button> <button onclick="save_window();">Save</button></div>
+<div style="flex: 1"><label><input type="file" id="load_file" style="display:none" onchange="load_window()"/><button onclick="document.getElementById('load_file').click();">Load</button></label> <button onclick="save_window();">Save</button></div>
 <div style="flex: 1; text-align:right">
 Rust Crate: <select><option>gtk</option><option selected>winapi</option></select>
-<button onclick="var menu = document.getElementById('build_menu'); if(menu.style.display == 'none') { menu.style.display='block'; rect = this.getBoundingClientRect(); menu.style.left = (rect.left+rect.width-menu.offsetWidth-2) + 'px'; menu.style.top = (rect.top - menu.offsetHeight) + 'px'; } else { menu.style.display='none'; }">Build</button></div>
-</aside>
-<aside id="build_menu" style="border: 1px solid black; background-color: #D4D0C8; position: absolute; top: 100px; left:100px; display:none; padding:2px;">
-<a onclick="build_rust(); return false;" href="#">main.rs</a><br>
-<a href="winapi_lib.rs" download type="application/octect-stream">winapi_lib.rs</a><br>
-<a href="Cargo.toml" download type="application/octect-stream">Cargo.toml</a><br>
+<button onclick="build_rust();">Build</button></div>
 </aside>
 </body>
 </html>
