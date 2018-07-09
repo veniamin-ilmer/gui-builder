@@ -10,7 +10,6 @@ body {margin:0}
   border-width: 2px;
   overflow: auto;
   display: flex;
-  resize: both;
   flex-direction: column;
 }
 #window_title {
@@ -139,6 +138,11 @@ function pageMouseDown() {
   while(selected.length > 0) {
     selected[0].classList.remove('selected');
   }
+  
+  document.getElementById('window_input').style.display = "block";
+  document.getElementById('button_input').style.display = "none";
+  document.getElementById('entry_input').style.display = "none";
+  document.getElementById('image_input').style.display = "none";
 }
 
 function windowMouseDown(e) {
@@ -186,6 +190,23 @@ function objectMouseDown(e) {
       this.id = 'focused';
     }
     focused = this;
+    
+    if(OBJECT_MEMORY[focused.memory_id].type == 'button') {
+      document.getElementById('window_input').style.display = "none";
+      document.getElementById('button_input').style.display = "block";
+      document.getElementById('entry_input').style.display = "none";
+      document.getElementById('image_input').style.display = "none";
+    } else if(OBJECT_MEMORY[focused.memory_id].type == 'entry') {
+      document.getElementById('window_input').style.display = "none";
+      document.getElementById('button_input').style.display = "none";
+      document.getElementById('entry_input').style.display = "block";
+      document.getElementById('image_input').style.display = "none";
+    } else if(OBJECT_MEMORY[focused.memory_id].type == 'image') {
+      document.getElementById('window_input').style.display = "none";
+      document.getElementById('button_input').style.display = "none";
+      document.getElementById('entry_input').style.display = "none";
+      document.getElementById('image_input').style.display = "block";
+    }
     
     //Set this as "new" attributes in case nothing actually changes and we need to record it for mouseup. These attributes will be able to change in the mousemove event.
     NEW_LEFT = OBJECT_MEMORY[focused.memory_id].left;
@@ -375,11 +396,29 @@ function mouseUp(e) {
     if(obj_type != null) {
       var obj;
       if(obj_type.classList.contains('button'))
+      {
         obj = createButton(NEW_LEFT, NEW_TOP, NEW_WIDTH, NEW_HEIGHT);
+        document.getElementById('window_input').style.display = "none";
+        document.getElementById('button_input').style.display = "block";
+        document.getElementById('entry_input').style.display = "none";
+        document.getElementById('image_input').style.display = "none";
+      }
       else if(obj_type.classList.contains('entry'))
+      {
         obj = createEntry(NEW_LEFT, NEW_TOP, NEW_WIDTH, NEW_HEIGHT);
+        document.getElementById('window_input').style.display = "none";
+        document.getElementById('button_input').style.display = "none";
+        document.getElementById('entry_input').style.display = "block";
+        document.getElementById('image_input').style.display = "none";
+      }
       else if(obj_type.classList.contains('image'))
+      {
         obj = createImage(NEW_LEFT, NEW_TOP, NEW_WIDTH, NEW_HEIGHT);
+        document.getElementById('window_input').style.display = "none";
+        document.getElementById('button_input').style.display = "none";
+        document.getElementById('entry_input').style.display = "none";
+        document.getElementById('image_input').style.display = "block";
+      }
       obj.id = 'focused';
       moveResizers();
       obj_type.removeAttribute('id');  //Restore
@@ -555,7 +594,10 @@ function set_input(label, input_id) {
 function set_value(input, actual_id, actual_attr, append_str) {
   var value = input.value;
   var actual_obj = document.getElementById(actual_id);
-  eval('actual_obj.' + actual_attr + '="' + value + append_str + '";');
+  if(append_str == null)
+    eval('actual_obj.' + actual_attr + '="' + value + '";');
+  else
+    eval('actual_obj.' + actual_attr + '="' + value + append_str + '";');
 }
 </script>
 <script src="FileSaver.js"></script>
@@ -570,6 +612,7 @@ if (file) {
   var reader = new FileReader();
   reader.readAsText(file, "UTF-8");
   reader.onload = function (event) {
+    if(confirm("Lose current changes?"))
     //Remove all old objects.
     for(var memory_id = 0; memory_id < OBJECT_MEMORY.length; memory_id++) {
       var obj = document.querySelectorAll('[memory_id="' + memory_id + '"]')[0];
@@ -606,8 +649,9 @@ function build_rust() {
 <aside style="float:right; width: 300px; resize: horizontal; border-style: outset; border-width: 1px; background-color: #D4D0C8;" id="obj_detail" onmousedown="event.stopPropagation(); //Stop unfocus code from triggering">
 <button style="width:100%" onclick="delete_element()">Delete</button>
 <br><br>
-<table style="width:100%">
-<caption>Window</caption>
+
+<table style="width:100%" id="window_input">
+<caption style="font-weight: bold">Window</caption>
 <tr>
 <td>Title</td>
 <td width="100%"><input style="width:100%" type="text" value="Title" id="title_input" oninput="set_value(this, 'window_title', 'innerText');" /></td>
@@ -615,15 +659,104 @@ function build_rust() {
 </tr>
 <tr>
 <td>Width</td>
-<td width="100%"><input style="width:100%" type="text" value="800" id="width_input" oninput="set_value(this, 'window', 'style.width', 'px');" /></td>
+<td width="100%"><input style="width:100%" type="number" value="800" id="width_input" oninput="set_value(this, 'window', 'style.width', 'px');" /></td>
 <td><button onclick="set_input('Width', 'width_input');">...</button></td>
 </tr>
 <tr>
 <td>Height</td>
-<td width="100%"><input style="width:100%" type="text" value="600" id="height_input" oninput="set_value(this, 'window', 'style.height', 'px');" /></td>
+<td width="100%"><input style="width:100%" type="number" value="600" id="height_input" oninput="set_value(this, 'window', 'style.height', 'px');" /></td>
 <td><button onclick="set_input('Height', 'height_input');">...</button></td>
 </tr>
 </table>
+
+<table style="width:100%; display:none" id="button_input">
+<caption style="font-weight: bold">Button</caption>
+<tr>
+<td>Label</td>
+<td width="100%"><input style="width:100%" type="text" value="Label" id="label_input" oninput="set_value(this, 'focused', 'innerText');" /></td>
+<td><button onclick="set_input('Label', 'label_input');">...</button></td>
+</tr>
+<tr>
+<td>Left</td>
+<td width="100%"><input style="width:100%" type="number" value="800" id="left_input" oninput="set_value(this, 'focused', 'style.left', 'px');" /></td>
+<td><button onclick="set_input('Left', 'left_input');">...</button></td>
+</tr>
+<tr>
+<td>Top</td>
+<td width="100%"><input style="width:100%" type="number" value="600" id="top_input" oninput="set_value(this, 'focused', 'style.top', 'px');" /></td>
+<td><button onclick="set_input('Top', 'top_input');">...</button></td>
+</tr>
+<tr>
+<td>Width</td>
+<td width="100%"><input style="width:100%" type="number" value="800" id="width_input" oninput="set_value(this, 'focused', 'style.width', 'px');" /></td>
+<td><button onclick="set_input('Width', 'width_input');">...</button></td>
+</tr>
+<tr>
+<td>Height</td>
+<td width="100%"><input style="width:100%" type="number" value="600" id="height_input" oninput="set_value(this, 'focused', 'style.height', 'px');" /></td>
+<td><button onclick="set_input('Height', 'height_input');">...</button></td>
+</tr>
+</table>
+
+<table style="width:100%; display:none" id="entry_input">
+<caption style="font-weight: bold">Entry</caption>
+<tr>
+<td>Text</td>
+<td width="100%"><input style="width:100%" type="text" value="Text" id="text_input" oninput="set_value(this, 'focused', 'innerText');" /></td>
+<td><button onclick="set_input('Text', 'text_input');">...</button></td>
+</tr>
+<tr>
+<td>Left</td>
+<td width="100%"><input style="width:100%" type="number" value="800" id="left_input" oninput="set_value(this, 'focused', 'style.left', 'px');" /></td>
+<td><button onclick="set_input('Left', 'left_input');">...</button></td>
+</tr>
+<tr>
+<td>Top</td>
+<td width="100%"><input style="width:100%" type="number" value="600" id="top_input" oninput="set_value(this, 'focused', 'style.top', 'px');" /></td>
+<td><button onclick="set_input('Top', 'top_input');">...</button></td>
+</tr>
+<tr>
+<td>Width</td>
+<td width="100%"><input style="width:100%" type="number" value="800" id="width_input" oninput="set_value(this, 'focused', 'style.width', 'px');" /></td>
+<td><button onclick="set_input('Width', 'width_input');">...</button></td>
+</tr>
+<tr>
+<td>Height</td>
+<td width="100%"><input style="width:100%" type="number" value="600" id="height_input" oninput="set_value(this, 'focused', 'style.height', 'px');" /></td>
+<td><button onclick="set_input('Height', 'height_input');">...</button></td>
+</tr>
+</table>
+
+<table style="width:100%; display:none" id="image_input">
+<caption style="font-weight: bold">Image</caption>
+<tr>
+<td>Image</td>
+<td width="100%"><input style="width:100%" type="file" value="Text" id="text_input" /></td>
+</tr>
+<tr>
+<td>Left</td>
+<td width="100%"><input style="width:100%" type="number" value="800" id="left_input" oninput="set_value(this, 'focused', 'style.left', 'px');" /></td>
+<td><button onclick="set_input('Left', 'left_input');">...</button></td>
+</tr>
+<tr>
+<td>Top</td>
+<td width="100%"><input style="width:100%" type="number" value="600" id="top_input" oninput="set_value(this, 'focused', 'style.top', 'px');" /></td>
+<td><button onclick="set_input('Top', 'top_input');">...</button></td>
+</tr>
+<tr>
+<td>Width</td>
+<td width="100%"><input style="width:100%" type="number" value="800" id="width_input" oninput="set_value(this, 'focused', 'style.width', 'px');" /></td>
+<td><button onclick="set_input('Width', 'width_input');">...</button></td>
+</tr>
+<tr>
+<td>Height</td>
+<td width="100%"><input style="width:100%" type="number" value="600" id="height_input" oninput="set_value(this, 'focused', 'style.height', 'px');" /></td>
+<td><button onclick="set_input('Height', 'height_input');">...</button></td>
+</tr>
+</table>
+
+<br/>
+
 </aside>
 <article id="window" style="width:800px; height:625px; float:left">
 <section id="window_title">Title</section>
