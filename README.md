@@ -1,12 +1,9 @@
-# Visual Rust
-This is going to be a *long* project...
-
-I want to build the "Visual Basic" of Rust:
+# GUI Builder
+This project should help programmers jumpstart their GUI application programming.
 
 * An easy to use platform where you can click and drag, resize, and reconfigure widgets on a window.
-* This window should be able to compile into Rust code, cross-compatible in Windows, Mac, and Linux.
-* The widgets (buttons, text boxes, etc) should use the Operating System's native libraries.
-* All of the widgets should have programmable event handlers, with the OS abstracted away.
+* The platform should be able to build into Rust code, using any widget based Crate. (winapi, gtk, etc)
+* This starting Rust code should provide example event handling functionality to the user from each Crate.
 
 ### [Why?](read/why.md)
 
