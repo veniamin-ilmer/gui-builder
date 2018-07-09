@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Rust GUI Editor</title>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<style>
+body {margin:0}
+#window {
+  border-style: outset;
+  border-width: 2px;
+  overflow: auto;
+  display: flex;
+  resize: both;
+  flex-direction: column;
+}
+#window_title {
+  box-sizing: border-box;
+  height: 25px;
+  background-color: blue;
+  color: white;
+  padding: 2px;
+  width: 100%;
+  flex: none;
+  -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -o-user-select: none; user-select: none;
+}
+#window_body {
+  box-sizing: border-box;
+  overflow: auto;
+  background-color:#D4D0C8;
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  flex: 1;
+  cursor: crosshair;
+}
+
+.object {
+  box-sizing: border-box;
+  overflow: auto;
+  cursor: grab;
+  position: absolute;
+  -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -o-user-select: none; user-select: none;
+  -webkit-user-drag: none; -khtml-user-drag: none; -moz-user-drag: none; -o-user-drag: none; user-drag: none;
+}
+
+.object:active {
+  cursor: grabbing;
+}
+
+.toolbar_object {
+  width:100px;
+  height:30px;
+  display:inline-block;
+  box-sizing: border-box;
+  overflow: auto;
+  cursor: pointer;
+  -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -o-user-select: none; user-select: none;
+  -webkit-user-drag: none; -khtml-user-drag: none; -moz-user-drag: none; -o-user-drag: none; user-drag: none;
+}
+
+.toolbar_object:hover {
+  outline: solid 1px blue;
+}
+
+#toolbar_select {
+  outline: solid 3px blue;
+}
+
+.selected {
+  outline: solid 3px red;
+}
+
+.button {
+  border-style: outset;
+  border-width: 2px;
+  background-color: #D4D0C8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.entry {
+  border-style: inset;
+  border-width: 2px;
+  background-color: white;
+  padding: 2px;
+}
+
+.image {
+  background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/79/Book_closed_template.png");
+}
+
+.resizer {
+  width: 10px;
+  height: 10px;
+  background: red;
+  position: absolute;
+  display: none;
+  z-index: 10000;
+  -webkit-user-drag: none; -khtml-user-drag: none; -moz-user-drag: none; -o-user-drag: none; user-drag: none;
+}
+
+#selector {
+  border: 1px dotted black;
+  display: none;
+  position: absolute;
+  z-index: 10000;
+  width:1px;
+  height:1px;
+}
+
+</style>
+<script>
+
+OBJECT_MEMORY = [];
+
+window.onload = function() {
+
+  DRAG_TYPE = '';
+
+  window.addEventListener('mousedown', pageMouseDown, false);
+  window.addEventListener('mousemove', mouseMove, false);
+  window.addEventListener('mouseup', mouseUp, false);
+ 
+  var button = createButton(10, 10, 100, 100);
+  var button = createButton(210, 10, 100, 100);
+  var entry = createEntry(10, 210, 100, 100);
+  var image = createImage(210, 210, 100, 100);
+  
+  document.getElementById('window_body').addEventListener('mousedown', windowMouseDown, false);  //Focus on me.
+}
+
+function pageMouseDown() {
+  //Remove focus and selections
+  if(document.getElementById('focused') != null)
+    document.getElementById('focused').removeAttribute('id');
+  document.getElementById('nw').style.display = 'none';
+  document.getElementById('ne').style.display = 'none';
+  document.getElementById('sw').style.display = 'none';
+  document.getElementById('se').style.display = 'none';
+  
+  var selected = document.getElementsByClassName('selected');
+  while(selected.length > 0) {
+    selected[0].classList.remove('selected');
+  }
+}
+
+function windowMouseDown(e) {
+  rememberXY(e);
+  var selector = document.getElementById('selector');
+  var window_body = document.getElementById('window_body');
+  var x = INITX - window_body.offsetLeft;
+  var y = INITY - window_body.offsetTop;
+  selector.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+  selector.style.display = 'block';
+  selector.style.width = '0px';
+  selector.style.height = '0px';
+
+  DRAG_TYPE = 'selecting';
+  //Do not stop propagation!
+}
+
+function objectMouseDown(e) {
+
+  DRAG_TYPE = 'move';
+  rememberXY(e);
+
+  //Part of multiple selection?
+  if(this.classList.contains('selected')) {
+    //Hide resizers
+    document.getElementById('nw').style.display = 'none';
+    document.getElementById('ne').style.display = 'none';
+    document.getElementById('sw').style.display = 'none';
+    document.getElementById('se').style.display = 'none';
+  }
+  else
+  {
+    var selected = document.getElementsByClassName('selected');
+    while(selected.length > 0) {
+      selected[0].classList.remove('selected');
+    }
+  
+    if(document.getElementById('focused') == null)
+    {
+      this.id = 'focused';
+    }
+    else if(document.getElementById('focused') != this)
+    {
+      document.getElementById('focused').removeAttribute('id');
+      this.id = 'focused';
+    }
+    focused = this;
+    
+    //Set this as "new" attributes in case nothing actually changes and we need to record it for mouseup. These attributes will be able to change in the mousemove event.
+    NEW_LEFT = OBJECT_MEMORY[focused.memory_id].left;
+    NEW_TOP = OBJECT_MEMORY[focused.memory_id].top;
+    NEW_WIDTH = OBJECT_MEMORY[focused.memory_id].width;
+    NEW_HEIGHT = OBJECT_MEMORY[focused.memory_id].height;
+    moveResizers();
+  }
+  e.stopPropagation();
+}
+
+function rememberXY(e) {
+  INITX = e.clientX;
+  INITY = e.clientY;
+}
+
+
+function mouseMove(e) {
+
+  if(DRAG_TYPE == '') {
+    return;
+  }
+  
+  if (DRAG_TYPE == "selecting") {
+  
+    var biggerX, biggerY, smallerX, smallerY;
+    
+    if(e.clientX >= INITX) {
+      biggerX = e.clientX;
+      smallerX = INITX;
+    } else if(e.clientX < INITX) {
+      biggerX = INITX;
+      smallerX = e.clientX;
+    }
+
+    if(e.clientY >= INITY) {
+      biggerY = e.clientY;
+      smallerY = INITY;
+    } else if(e.clientY < INITY) {
+      biggerY = INITY;
+      smallerY = e.clientY;
+    }
+
+    var selector = document.getElementById('selector');
+    selector.style.transform = 'translate(' + (smallerX - window_body.offsetLeft) + 'px, ' + (smallerY - window_body.offsetTop) + 'px)';
+    selector.style.width = (biggerX - smallerX) + 'px';
+    selector.style.height = (biggerY - smallerY) + 'px';
+
+    smallerX -=  window_body.offsetLeft;
+    biggerX -=  window_body.offsetLeft;
+
+    smallerY -=  window_body.offsetTop;
+    biggerY -=  window_body.offsetTop;
+    
+    //Adding new objects.
+    if(document.getElementById('toolbar_select') != null) {
+      NEW_LEFT = smallerX;
+      NEW_TOP = smallerY;
+      NEW_WIDTH = biggerX - smallerX;
+      NEW_HEIGHT = biggerY - smallerY;
+    }
+    //Not adding new objects. Normal selector looking for objects.
+    else if(document.getElementById('toolbar_select') == null) {
+
+      for(var i = 0; i < OBJECT_MEMORY.length; i++) {
+        var obj = document.querySelectorAll('[memory_id="' + i + '"]')[0];
+
+        ///obj == null if it was deleted.
+        if(obj != null) {
+          //It's easier to figure out if an object is NOT inside of the square, so lets figure that out.
+          if(OBJECT_MEMORY[i].left + OBJECT_MEMORY[i].width < smallerX || OBJECT_MEMORY[i].left > biggerX || OBJECT_MEMORY[i].top + OBJECT_MEMORY[i].height < smallerY || OBJECT_MEMORY[i].top > biggerY) {
+            obj.classList.remove('selected');
+          } else {
+            obj.classList.add('selected');
+          }
+        }
+      }
+    }
+  } else {
+
+    var deltax = e.clientX - INITX;
+    var deltay = e.clientY - INITY;
+    if(DRAG_TYPE == 'move') {
+      var selected = document.getElementsByClassName('selected');
+      if(selected.length > 1) {
+        for(var i = 0; i < selected.length; i++) {
+          var old_left = OBJECT_MEMORY[selected[i].memory_id].left;
+          var old_top = OBJECT_MEMORY[selected[i].memory_id].top;
+          NEW_LEFT = old_left + deltax;
+          NEW_TOP = old_top + deltay;
+          selected[i].style.transform = 'translate(' + NEW_LEFT + 'px, ' + NEW_TOP + 'px)';
+        }
+      } else {
+        var focused = document.getElementById('focused');
+        var old_left = OBJECT_MEMORY[focused.memory_id].left;
+        var old_top = OBJECT_MEMORY[focused.memory_id].top;
+
+        NEW_LEFT = old_left + deltax;
+        NEW_TOP = old_top + deltay;
+        focused.style.transform = 'translate(' + NEW_LEFT + 'px, ' + NEW_TOP + 'px)';
+        moveResizers();
+      }
+    } else {
+      var focused = document.getElementById('focused');
+      var old_left = OBJECT_MEMORY[focused.memory_id].left;
+      var old_top = OBJECT_MEMORY[focused.memory_id].top;
+      var old_width = OBJECT_MEMORY[focused.memory_id].width;
+      var old_height = OBJECT_MEMORY[focused.memory_id].height;
+      
+      switch(DRAG_TYPE) {
+        case 'nw':
+          NEW_LEFT = old_left + deltax;
+          NEW_TOP = old_top + deltay;
+          NEW_WIDTH = old_width - deltax;
+          NEW_HEIGHT = old_height - deltay;
+          break;
+
+        case 'ne':
+          NEW_LEFT = old_left;
+          NEW_TOP = old_top + deltay;
+          NEW_WIDTH = old_width + deltax;
+          NEW_HEIGHT = old_height - deltay;
+          break;
+
+        case 'sw':
+          NEW_LEFT = old_left + deltax;
+          NEW_TOP = old_top;
+          NEW_WIDTH = old_width - deltax;
+          NEW_HEIGHT = old_height + deltay;
+          break;
+
+        case 'se':
+          NEW_LEFT = old_left;
+          NEW_TOP = old_top;
+          NEW_WIDTH = old_width + deltax;
+          NEW_HEIGHT = old_height + deltay;
+          break;
+      }
+      if(NEW_WIDTH <= 1) NEW_WIDTH = 1;
+      if(NEW_HEIGHT <= 1) NEW_HEIGHT = 1;
+      
+      focused.style.transform = 'translate(' + NEW_LEFT + 'px, ' + NEW_TOP + 'px)';
+      focused.style.width = NEW_WIDTH + 'px';
+      focused.style.height = NEW_HEIGHT + 'px';
+      moveResizers();
+    }
+  }
+}
+
+function moveResizers() {
+
+  var left = NEW_LEFT;
+  var top = NEW_TOP;
+  var width = NEW_WIDTH;
+  var height = NEW_HEIGHT;
+
+  var focused = document.getElementById('focused');
+
+  var nw = document.getElementById('nw');
+  nw.style.display = 'block'; //Must display block first, in order to get width and height.
+  var resizer_width = nw.offsetWidth;
+  var resizer_height = nw.offsetHeight;
+  nw.style.transform = 'translate(' + (left - resizer_width / 2) + 'px, ' + (top - resizer_height / 2) + 'px)';
+  var ne = document.getElementById('ne');
+  ne.style.transform = 'translate(' + (left + width - resizer_width / 2) + 'px, ' + (top - resizer_height / 2) + 'px)';
+  ne.style.display = 'block';
+  var sw = document.getElementById('sw');
+  sw.style.transform = 'translate(' + (left - resizer_width / 2) + 'px, ' + (top + height - resizer_height / 2) + 'px)';
+  sw.style.display = 'block';
+  var se = document.getElementById('se');
+  se.style.transform = 'translate(' + (left + width - resizer_width / 2) + 'px, ' + (top + height - resizer_height / 2) + 'px)';
+  se.style.display = 'block';
+}
+
+
+
+function mouseUp(e) {
+  if(DRAG_TYPE == '') {
+    return;
+  }
+  //If there was only one selection, focus on it, with resizers.
+  else if(DRAG_TYPE == 'selecting') {
+    document.getElementById('selector').style.display = 'none';
+    
+    //Adding object from toolbar
+    var obj_type = document.getElementById('toolbar_select');
+    if(obj_type != null) {
+      var obj;
+      if(obj_type.classList.contains('button'))
+        obj = createButton(NEW_LEFT, NEW_TOP, NEW_WIDTH, NEW_HEIGHT);
+      else if(obj_type.classList.contains('entry'))
+        obj = createEntry(NEW_LEFT, NEW_TOP, NEW_WIDTH, NEW_HEIGHT);
+      else if(obj_type.classList.contains('image'))
+        obj = createImage(NEW_LEFT, NEW_TOP, NEW_WIDTH, NEW_HEIGHT);
+      obj.id = 'focused';
+      moveResizers();
+      obj_type.removeAttribute('id');  //Restore
+      document.getElementById('selector').style.border = "1px dotted black"; //Restore
+    
+    //Normal selector
+    } else {
+    
+      var selected = document.getElementsByClassName('selected');
+      if(selected.length == 1)
+      {
+        focused = selected[0];
+        focused.classList.remove('selected');
+        focused.id = 'focused';
+
+        NEW_LEFT = OBJECT_MEMORY[focused.memory_id].left;
+        NEW_TOP = OBJECT_MEMORY[focused.memory_id].top;
+        NEW_WIDTH = OBJECT_MEMORY[focused.memory_id].width;
+        NEW_HEIGHT = OBJECT_MEMORY[focused.memory_id].height;
+        moveResizers();
+      }
+    }
+  }
+  //Save Move
+  else if(DRAG_TYPE == 'move') {
+    var deltax = e.clientX - INITX;
+    var deltay = e.clientY - INITY;
+
+    var selected = document.getElementsByClassName('selected');
+    if(selected.length > 1) {
+      for(var i = 0; i < selected.length; i++)
+      {
+        var old_left = OBJECT_MEMORY[selected[i].memory_id].left;
+        var old_top = OBJECT_MEMORY[selected[i].memory_id].top;
+        NEW_LEFT = old_left + deltax;
+        NEW_TOP = old_top + deltay;
+        OBJECT_MEMORY[selected[i].memory_id].left = NEW_LEFT;
+        OBJECT_MEMORY[selected[i].memory_id].top = NEW_TOP;
+      }
+    } else {
+      var focused = document.getElementById('focused');
+      var old_left = OBJECT_MEMORY[focused.memory_id].left;
+      var old_top = OBJECT_MEMORY[focused.memory_id].top;
+      NEW_LEFT = old_left + deltax;
+      NEW_TOP = old_top + deltay;
+      OBJECT_MEMORY[focused.memory_id].left = NEW_LEFT;
+      OBJECT_MEMORY[focused.memory_id].top = NEW_TOP;
+    }
+  }
+  //Save Resize
+  else  {
+    var focused = document.getElementById('focused');
+    OBJECT_MEMORY[focused.memory_id].left = NEW_LEFT;
+    OBJECT_MEMORY[focused.memory_id].top = NEW_TOP;
+    OBJECT_MEMORY[focused.memory_id].width = NEW_WIDTH;
+    OBJECT_MEMORY[focused.memory_id].height = NEW_HEIGHT;
+  }
+  DRAG_TYPE = '';
+}
+
+
+
+function createButton(left, top, width, height) {
+  var memory_id = OBJECT_MEMORY.push({'left': left, 'top': top, 'width': width, 'height': height}) - 1;
+
+  var button = document.createElement("div");
+  button.className = "object button";
+  button.style.transform = 'translate(' + left + 'px, ' + top + 'px)';
+  button.style.width = width + "px";
+  button.style.height = height + "px";
+  button.appendChild(document.createTextNode("Button"));
+  button.addEventListener('mousedown', objectMouseDown, false);  //Focus on me.
+  button.setAttribute('memory_id', memory_id);
+  button.memory_id = memory_id;
+  button.addEventListener('dragstart', function () {return false;}, false);  //Stop automatic browser dragging
+
+  document.getElementById('window_body').appendChild(button);
+
+  return button;
+}
+
+function createEntry(left, top, width, height) {
+  var memory_id = OBJECT_MEMORY.push({'left': left, 'top': top, 'width': width, 'height': height}) - 1;
+
+  var entry = document.createElement("div");
+  entry.className = "object entry";
+  entry.style.transform = 'translate(' + left + 'px, ' + top + 'px)';
+  entry.style.width = width + "px";
+  entry.style.height = height + "px";
+  entry.appendChild(document.createTextNode("Entry"));
+  entry.addEventListener('mousedown', objectMouseDown, false);  //Focus on me.
+  entry.setAttribute('memory_id', memory_id);
+  entry.memory_id = memory_id;
+  entry.addEventListener('dragstart', function () {return false;}, false);  //Stop automatic browser dragging
+
+  document.getElementById('window_body').appendChild(entry);
+
+  return entry;
+}
+
+function createImage(left, top, width, height) {
+  var memory_id = OBJECT_MEMORY.push({'left': left, 'top': top, 'width': width, 'height': height}) - 1;
+
+  var image = document.createElement("div");
+  image.className = "object image";
+  image.style.transform = 'translate(' + left + 'px, ' + top + 'px)';
+  image.style.width = width + "px";
+  image.style.height = height + "px";
+  image.addEventListener('mousedown', objectMouseDown, false);  //Focus on me.
+  image.setAttribute('memory_id', memory_id);
+  image.memory_id = memory_id;
+  image.addEventListener('dragstart', function () {return false;}, false);  //Stop automatic browser dragging
+
+  document.getElementById('window_body').appendChild(image);
+
+  return image;
+}
+
+function toolbar_click(me) {
+  var objs = document.getElementsByClassName('toolbar_object');
+  for(var i = 0; i < objs.length; i++) {
+    if(objs[i] == me) {
+      if(objs[i].id == 'toolbar_select') {
+        objs[i].removeAttribute('id');  //Deselect current item
+        document.getElementById('selector').style.border = "1px dotted black";
+      } else {
+        objs[i].id = 'toolbar_select';  //Select current item
+        document.getElementById('selector').style.border = "2px solid black";
+      }
+    } else {
+      objs[i].removeAttribute('id');
+    }
+  }
+}
+
+function delete_element() {
+
+  var selected = document.getElementsByClassName('selected');
+  var window_body = document.getElementById('window_body');
+  if(selected.length > 1) {
+    while(selected.length > 0) {
+      var focused = selected[0];
+      window_body.removeChild(focused);
+      focused.classList.remove('selected');
+    }
+  } else {
+    var focused = document.getElementById('focused');
+    window_body.removeChild(focused);
+    focused.removeAttribute('id');
+  }
+  
+  document.getElementById('nw').style.display = 'none';
+  document.getElementById('ne').style.display = 'none';
+  document.getElementById('sw').style.display = 'none';
+  document.getElementById('se').style.display = 'none';
+}
+
+function set_input(label, input_id) {
+  var input = document.getElementById(input_id);
+  var input_option = prompt(label, input.value);
+  if(input_option != null && input_option != "") {
+    input.value = input_option;
+    //Trigger "onchange" event to make the update.
+    var event = document.createEvent("HTMLEvents");
+    event.initEvent("input", true, true);
+    event.eventName = "input";
+    input.dispatchEvent(event);
+  }
+}
+
+function set_value(input, actual_id, actual_attr, append_str) {
+  var value = input.value;
+  var actual_obj = document.getElementById(actual_id);
+  eval('actual_obj.' + actual_attr + '="' + value + append_str + '";');
+}
+</script>
+<script src="FileSaver.js"></script>
+<script>
+function save_window() {
+  saveTextAs(JSON.stringify(OBJECT_MEMORY), "rust_window.json");
+}
+function build_rust() {
+  saveTextAs(JSON.stringify(OBJECT_MEMORY), "main.rs");
+}
+</script>
+</head>
+<body>
+<aside style="border-style: outset; border-width: 1px; background-color: #D4D0C8;">
+<div class="toolbar_object button" onclick="toolbar_click(this);">Button</div></div>
+<div class="toolbar_object entry" onclick="toolbar_click(this);">Entry</div>
+<div class="toolbar_object image" onclick="toolbar_click(this);"></div>
+</aside>
+<aside style="float:right; width: 300px; resize: horizontal; border-style: outset; border-width: 1px; background-color: #D4D0C8;" id="obj_detail" onmousedown="event.stopPropagation(); //Stop unfocus code from triggering">
+<button style="width:100%" onclick="delete_element()">Delete</button>
+<br><br>
+<table style="width:100%">
+<tr>
+<td>Title</td>
+<td width="100%"><input style="width:100%" type="text" value="Title" id="title_input" oninput="set_value(this, 'window_title', 'innerText');" /></td>
+<td><button onclick="set_input('Title', 'title_input');">...</button></td>
+</tr>
+<tr>
+<td>Width</td>
+<td width="100%"><input style="width:100%" type="text" value="800" id="width_input" oninput="set_value(this, 'window', 'style.width', 'px');" /></td>
+<td><button onclick="set_input('Width', 'width_input');">...</button></td>
+</tr>
+<tr>
+<td>Height</td>
+<td width="100%"><input style="width:100%" type="text" value="600" id="height_input" oninput="set_value(this, 'window', 'style.height', 'px');" /></td>
+<td><button onclick="set_input('Height', 'height_input');">...</button></td>
+</tr>
+</table>
+</aside>
+<article id="window" style="width:800px; height:625px; float:left" onresize="alert('meow'); document.getElementById('width_input').value=document.getElementById('window').offsetWidth; document.getElementById('height_input').value=document.getElementById('window').offsetHeight;">
+<section id="window_title">Title</section>
+<section id="window_body">
+<div class="resizer" id="nw" style='cursor:nw-resize;' onmousedown="DRAG_TYPE = 'nw'; rememberXY(event); event.stopPropagation();" ondragstart="return false;"></div>
+<div class="resizer" id="ne" style='cursor:ne-resize;' onmousedown="DRAG_TYPE = 'ne'; rememberXY(event); event.stopPropagation();" ondragstart="return false;"></div>
+<div class="resizer" id="sw" style='cursor:sw-resize;' onmousedown="DRAG_TYPE = 'sw'; rememberXY(event); event.stopPropagation();" ondragstart="return false;"></div>
+<div class="resizer" id="se" style='cursor:se-resize;' onmousedown="DRAG_TYPE = 'se'; rememberXY(event); event.stopPropagation();" ondragstart="return false;"></div>
+<div id="selector"></div>
+</section>
+</article>
+<aside style="clear:both; border-style: outset; border-width: 1px; background-color: #D4D0C8; position: fixed; bottom: 0; width: 100%; display:flex">
+<div style="flex: 1"><button>Load</button> <button onclick="save_window();">Save</button></div>
+<div style="flex: 1; text-align:right">
+Rust Crate: <select><option>gtk</option><option selected>winapi</option></select>
+<button onclick="var menu = document.getElementById('build_menu'); if(menu.style.display == 'none') { menu.style.display='block'; rect = this.getBoundingClientRect(); menu.style.left = (rect.left+rect.width-menu.offsetWidth-2) + 'px'; menu.style.top = (rect.top - menu.offsetHeight) + 'px'; } else { menu.style.display='none'; }">Build</button></div>
+</aside>
+<aside id="build_menu" style="border: 1px solid black; background-color: #D4D0C8; position: absolute; top: 100px; left:100px; display:none; padding:2px;">
+<a onclick="build_rust(); return false;" href="#">main.rs</a><br>
+<a href="winapi_lib.rs" download type="application/octect-stream">winapi_lib.rs</a><br>
+<a href="Cargo.toml" download type="application/octect-stream">Cargo.toml</a><br>
+</aside>
+</body>
+</html>
