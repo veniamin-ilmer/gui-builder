@@ -36,14 +36,12 @@ We are exposing the guts of each Crate, and letting the user decide which is bes
 
 This is going to be a long project. There is plenty you can do to help.
 
-### First Version
-
-#### Part A - Complete
+### Part A - Complete
 Write Rust code that creates an example window, with a few widgets in a few Crates.
 
 For each Crate, provide example hooks into widget specific event handlers.
 
-#### Part B - In Progress
+### Part B - In Progress
 Write up a HTML / Javascript "portal" that allows the user to build "widgets" on a "window".
 
 The "windows" and "widgets" here would just be drawings of the real thing.
@@ -54,12 +52,12 @@ When you click on any widget, a dialog appears, that allows the user to change a
 
 The user should be able to click and drag, resize, create, delete any widget.
 
-#### Part C - In Progress
+### Part C - In Progress
 Figure out some way to Save and Open projects in the HTML portal.
 
 This should keep all configuration data about all widgets on the window.
 
-#### Part D - In Progress
+### Part D - In Progress
 Make the HTML portal have a "Build" button that generates all of the Rust code required to build the widgets for the chosen Crate.
 
 Example event handling should be exposed to the user.
@@ -68,8 +66,8 @@ The GUI builder will provide starter GUI code.
 
 This should be considered a learning experience, for the user, to figure out which Crate is best for them.
 
-#### Part E
-When complete up to here, release this code to the public and get feedback.
+### Part E
+Release this code to the public and get feedback.
 
 Find out what people want more of:
 
