@@ -7,8 +7,8 @@ This project should help programmers jumpstart their GUI application programming
 
 ## Progress Pics
 
-![WinAPI](read/winapi.png)
-![GTK](read/gtk.png)
+![WinAPI](pics/winapi.png)
+![GTK](pics/gtk.png)
 
 ## Why?
 GUI programming is generally considered a *hard* task, especially for a beginner programmer.
