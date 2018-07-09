@@ -26,9 +26,9 @@ Instead, the GUI Builder will provide support for all Crates independently.
 
 The hope is that eventually someone will build a cross-platform Crate, that the GUI Builder would build into.
 
-* The GUI Builder should not have standardized functions for building widgets.
+* The GUI Builder will not have standardized functions for building widgets.
 
-We should not be abstracting away a Crate's insides for the users convenience.
+We should not be abstracting away a Crate's insides for the user's convenience.
 
 If a crate is inconvenient to use, that should not be hidden from the user.
 
