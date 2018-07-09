@@ -54,7 +54,7 @@ When you click on any widget, a dialog appears, that allows the user to change a
 
 The user should be able to click and drag, resize, create, delete any widget.
 
-### Part C - In Progress
+### Part C - Complete
 Figure out some way to Save and Open projects in the HTML portal.
 
 This should keep all configuration data about all widgets on the window.
