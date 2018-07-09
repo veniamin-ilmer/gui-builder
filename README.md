@@ -59,7 +59,7 @@ Figure out some way to Save and Open projects in the HTML portal.
 
 This should keep all configuration data about all widgets on the window.
 
-### Part D - In Progress
+### Part D
 Make the HTML portal have a "Build" button that generates all of the Rust code required to build the widgets for the chosen Crate.
 
 Example event handling should be exposed to the user.
