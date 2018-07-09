@@ -20,13 +20,15 @@ The target audience is a UI designer who wants to quickly build a fast cross-com
 The output Rust code is meant to act as a learning experience for the user, teaching them how to use each Crate.
 
 ## Limits of development
-The GUI Builder will not attempt to build into multiple Crates at the same time for cross compatibility.
+* The GUI Builder will not attempt to build into multiple Crates at the same time for cross compatibility.
 
 Instead, the GUI Builder will provide support for all Crates independently.
 
 The hope is that eventually someone will build a cross-platform Crate, that the GUI Builder would build into.
 
-**We should not be building an abstraction layer on top of each Crate.**
+* The GUI Builder should not have standardized functions for building widgets.
+
+We should not be abstracting away a Crate's insides for the users convenience.
 
 If a crate is inconvenient to use, that should not be hidden from the user.
 
